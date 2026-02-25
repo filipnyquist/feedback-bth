@@ -150,3 +150,8 @@ export async function requireAuth(req: Request): Promise<JwtPayload | Response> 
   }
   return payload;
 }
+
+export function isSuperAdmin(email: string): boolean {
+  const superUserEmail = process.env.SUPERUSER;
+  return !!superUserEmail && email.toLowerCase() === superUserEmail.toLowerCase();
+}

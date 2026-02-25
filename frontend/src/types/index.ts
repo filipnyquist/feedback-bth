@@ -78,3 +78,14 @@ export interface GroupUpdatePayload {
     name_en: string;
   }>;
 }
+
+export interface GroupCreatePayload {
+  entra_group_id?: string | null;
+  display_name_sv: string;
+  display_name_en: string;
+  about_markdown_sv?: string;
+  about_markdown_en?: string;
+  form_url_sv?: string;
+  form_url_en?: string;
+  logo_url?: string;
+}

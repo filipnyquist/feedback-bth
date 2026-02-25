@@ -35,6 +35,19 @@ export function updateGroup(id: string, data: import("@/types").GroupUpdatePaylo
   });
 }
 
+export function createGroup(data: import("@/types").GroupCreatePayload) {
+  return fetchApi<{ id: string; success: boolean }>(`/groups`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteGroup(id: string) {
+  return fetchApi<{ success: boolean }>(`/groups/${id}`, {
+    method: "DELETE",
+  });
+}
+
 export function loginUrl() {
   return `/api/auth/login`;
 }

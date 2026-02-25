@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useLanguage } from "@/hooks/useLanguage";
-import { getMe, updateGroup } from "@/lib/api";
+import { getMe, updateGroup, deleteGroup } from "@/lib/api";
 import { LanguageToggle } from "@/components/LanguageToggle";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +21,8 @@ export function EditGroup() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [group, setGroup] = useState<AdminGroup | null>(null);
 
   // Form state
@@ -74,6 +76,19 @@ export function EditGroup() {
       showToast(i18n.error, "error");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!id) return;
+    setDeleting(true);
+    try {
+      await deleteGroup(id);
+      showToast(i18n.groupDeleted, "success");
+      navigate("/admin");
+    } catch (err) {
+      showToast(i18n.error, "error");
+      setDeleting(false);
     }
   };
 
@@ -323,11 +338,50 @@ export function EditGroup() {
           </Card>
         </div>
 
-        <div className="mt-8 flex justify-end">
+        <div className="mt-8 flex items-center justify-between">
+          <Button
+            variant="destructive"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={deleting}
+          >
+            {i18n.deleteGroup}
+          </Button>
           <Button onClick={handleSave} disabled={saving} size="lg">
             {saving ? i18n.loading : i18n.save}
           </Button>
         </div>
+
+        {/* Delete Confirmation Dialog */}
+        {showDeleteConfirm && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <Card className="w-full max-w-md mx-4">
+              <CardHeader>
+                <CardTitle>{i18n.confirmDelete}</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">
+                  {i18n.confirmDeleteWarning}
+                </p>
+                <div className="flex gap-3 justify-end">
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={deleting}
+                  >
+                    {i18n.cancel}
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    onClick={handleDelete}
+                    disabled={deleting}
+                  >
+                    {deleting ? i18n.deleting : i18n.delete}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        )}
       </main>
     </div>
   );

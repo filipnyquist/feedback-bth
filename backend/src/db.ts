@@ -19,7 +19,7 @@ export function runMigrations() {
   const db = getDb();
   const migrationsDir = join(import.meta.dir, "../migrations");
   // Run all migration files in order
-  const migrationFiles = ["001_init.sql", "002_logo_url.sql"];
+  const migrationFiles = ["001_init.sql"];
   for (const file of migrationFiles) {
     const migrationPath = join(migrationsDir, file);
     if (existsSync(migrationPath)) {
@@ -127,6 +127,11 @@ export function getGroupsByEntraIds(entraGroupIds: string[]): Group[] {
     .all(...entraGroupIds) as Group[];
 }
 
+export function getAllGroups(): Group[] {
+  const db = getDb();
+  return db.query(`SELECT * FROM groups ORDER BY display_name_sv`).all() as Group[];
+}
+
 export function getProgramsByGroupId(groupId: string): Program[] {
   const db = getDb();
   return db.query(`SELECT * FROM programs WHERE group_id = ? ORDER BY name_sv`).all(groupId) as Program[];
@@ -198,4 +203,38 @@ export function deleteProgramsByGroupId(groupId: string, keepIds: string[]) {
     `DELETE FROM programs WHERE group_id = ? AND id NOT IN (${placeholders})`,
     [groupId, ...keepIds]
   );
+}
+
+export function createGroup(group: {
+  id: string;
+  entra_group_id: string | null;
+  display_name_sv: string;
+  display_name_en: string;
+  about_markdown_sv: string;
+  about_markdown_en: string;
+  form_url_sv: string;
+  form_url_en: string;
+  logo_url: string;
+}) {
+  const db = getDb();
+  db.run(
+    `INSERT INTO groups (id, entra_group_id, display_name_sv, display_name_en, about_markdown_sv, about_markdown_en, form_url_sv, form_url_en, logo_url, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+    [
+      group.id,
+      group.entra_group_id,
+      group.display_name_sv,
+      group.display_name_en,
+      group.about_markdown_sv,
+      group.about_markdown_en,
+      group.form_url_sv,
+      group.form_url_en,
+      group.logo_url,
+    ]
+  );
+}
+
+export function deleteGroup(id: string) {
+  const db = getDb();
+  db.run(`DELETE FROM groups WHERE id = ?`, [id]);
 }

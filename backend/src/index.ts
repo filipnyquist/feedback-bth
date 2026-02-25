@@ -2,7 +2,7 @@ import { runMigrations } from "./db";
 import { handleAuthLogin, handleAuthCallback } from "./routes/authRoutes";
 import { handleGetPrograms } from "./routes/programs";
 import { handleGetProgramById } from "./routes/programById";
-import { handleGetMe, handleUpdateGroup } from "./routes/admin";
+import { handleGetMe, handleUpdateGroup, handleCreateGroup, handleDeleteGroup } from "./routes/admin";
 import { join } from "path";
 import { existsSync } from "fs";
 
@@ -75,9 +75,17 @@ const server = Bun.serve({
       return handleGetMe(req, cors);
     }
 
+    if (method === "POST" && path === "/api/groups") {
+      return handleCreateGroup(req, cors);
+    }
+
     const groupMatch = path.match(/^\/api\/groups\/([^/]+)$/);
     if (method === "PUT" && groupMatch) {
       return handleUpdateGroup(req, groupMatch[1], cors);
+    }
+
+    if (method === "DELETE" && groupMatch) {
+      return handleDeleteGroup(req, groupMatch[1], cors);
     }
 
     // ---- Serve static frontend in production ----

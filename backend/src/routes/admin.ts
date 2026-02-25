@@ -1,11 +1,14 @@
-import { requireAuth, JwtPayload } from "../auth";
+import { requireAuth, JwtPayload, isSuperAdmin } from "../auth";
 import {
   getGroupsByEntraIds,
+  getAllGroups,
   getGroupById,
   getProgramsByGroupId,
   updateGroup,
   upsertProgram,
   deleteProgramsByGroupId,
+  createGroup,
+  deleteGroup,
   Program,
 } from "../db";
 import { randomUUID } from "crypto";
@@ -18,7 +21,9 @@ export async function handleGetMe(
   if (authResult instanceof Response) return authResult;
   const payload = authResult as JwtPayload;
 
-  const groups = getGroupsByEntraIds(payload.groupIds);
+  const groups = isSuperAdmin(payload.email)
+    ? getAllGroups()
+    : getGroupsByEntraIds(payload.groupIds);
 
   const result = await Promise.all(
     groups.map(async (g) => {
@@ -62,12 +67,14 @@ export async function handleUpdateGroup(
     });
   }
 
-  // Ensure the user's Entra group IDs include this group's entra_group_id
-  if (!group.entra_group_id || !payload.groupIds.includes(group.entra_group_id)) {
-    return new Response(JSON.stringify({ error: "Forbidden" }), {
-      status: 403,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
+  // Allow superadmins to edit any group, otherwise check Entra group membership
+  if (!isSuperAdmin(payload.email)) {
+    if (!group.entra_group_id || !payload.groupIds.includes(group.entra_group_id)) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
   }
 
   const body = (await req.json()) as {
@@ -104,6 +111,83 @@ export async function handleUpdateGroup(
   for (const program of programs) {
     upsertProgram(program);
   }
+
+  return new Response(JSON.stringify({ success: true }), {
+    headers: { "Content-Type": "application/json", ...corsHeaders },
+  });
+}
+
+export async function handleCreateGroup(
+  req: Request,
+  corsHeaders: Record<string, string>
+): Promise<Response> {
+  const authResult = await requireAuth(req);
+  if (authResult instanceof Response) return authResult;
+  const payload = authResult as JwtPayload;
+
+  if (!isSuperAdmin(payload.email)) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
+  const body = (await req.json()) as {
+    entra_group_id?: string | null;
+    display_name_sv: string;
+    display_name_en: string;
+    about_markdown_sv?: string;
+    about_markdown_en?: string;
+    form_url_sv?: string;
+    form_url_en?: string;
+    logo_url?: string;
+  };
+
+  const groupId = randomUUID();
+
+  createGroup({
+    id: groupId,
+    entra_group_id: body.entra_group_id ?? null,
+    display_name_sv: body.display_name_sv,
+    display_name_en: body.display_name_en,
+    about_markdown_sv: body.about_markdown_sv ?? '',
+    about_markdown_en: body.about_markdown_en ?? '',
+    form_url_sv: body.form_url_sv ?? '',
+    form_url_en: body.form_url_en ?? '',
+    logo_url: body.logo_url ?? '',
+  });
+
+  return new Response(JSON.stringify({ id: groupId, success: true }), {
+    status: 201,
+    headers: { "Content-Type": "application/json", ...corsHeaders },
+  });
+}
+
+export async function handleDeleteGroup(
+  req: Request,
+  groupId: string,
+  corsHeaders: Record<string, string>
+): Promise<Response> {
+  const authResult = await requireAuth(req);
+  if (authResult instanceof Response) return authResult;
+  const payload = authResult as JwtPayload;
+
+  if (!isSuperAdmin(payload.email)) {
+    return new Response(JSON.stringify({ error: "Forbidden" }), {
+      status: 403,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
+  const group = getGroupById(groupId);
+  if (!group) {
+    return new Response(JSON.stringify({ error: "Not found" }), {
+      status: 404,
+      headers: { "Content-Type": "application/json", ...corsHeaders },
+    });
+  }
+
+  deleteGroup(groupId);
 
   return new Response(JSON.stringify({ success: true }), {
     headers: { "Content-Type": "application/json", ...corsHeaders },

@@ -92,7 +92,16 @@ export function Admin() {
           <p className="text-muted-foreground text-sm mt-1">{user.email}</p>
         </div>
 
-        <h2 className="text-lg font-semibold mb-4">{i18n.yourGroups}</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">{i18n.yourGroups}</h2>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => navigate("/admin/group/new")}
+          >
+            + {i18n.createGroup}
+          </Button>
+        </div>
 
         {user.groups.length === 0 ? (
           <Card>
