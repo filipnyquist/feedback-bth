@@ -2,9 +2,9 @@ export const t = {
   sv: {
     welcome: "Välkommen att lämna feedback!",
     subtitle:
-      "Här kan du välja ditt program för att se vem du ska vända dig till för att lämna feedback, tankar och klagomål när det gäller ditt program och dina kurser!",
+      "Här kan du välja ditt program för att se vem du ska kontakta för feedback, tankar och klagomål kring ditt program och kurser!",
     searchPlaceholder: "Sök program...",
-    openForm: "Öppna formulär",
+    openForm: "Kontakta oss",
     responsibleGroup: "Ansvarig utbildningsförening",
     yourGroups: "Dina grupper",
     edit: "Redigera",
