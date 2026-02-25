@@ -36,6 +36,8 @@ export const t = {
     language: "Språk",
     swedish: "Svenska",
     english: "English",
+    logo: "Logotyp",
+    logoUrl: "Logotyp URL",
   },
   en: {
     welcome: "Welcome to leave feedback!",
@@ -74,6 +76,8 @@ export const t = {
     language: "Language",
     swedish: "Svenska",
     english: "English",
+    logo: "Logo",
+    logoUrl: "Logo URL",
   },
 } as const;
 

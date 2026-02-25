@@ -30,6 +30,7 @@ export function EditGroup() {
   const [aboutEn, setAboutEn] = useState("");
   const [formUrlSv, setFormUrlSv] = useState("");
   const [formUrlEn, setFormUrlEn] = useState("");
+  const [logoUrl, setLogoUrl] = useState("");
   const [programs, setPrograms] = useState<AdminProgram[]>([]);
 
   useEffect(() => {
@@ -47,6 +48,7 @@ export function EditGroup() {
         setAboutEn(found.about_markdown_en);
         setFormUrlSv(found.form_url_sv);
         setFormUrlEn(found.form_url_en);
+        setLogoUrl(found.logo_url);
         setPrograms(found.programs);
       })
       .catch(() => navigate("/admin"))
@@ -64,6 +66,7 @@ export function EditGroup() {
         about_markdown_en: aboutEn,
         form_url_sv: formUrlSv,
         form_url_en: formUrlEn,
+        logo_url: logoUrl,
         programs,
       });
       showToast(i18n.saved, "success");
@@ -106,8 +109,12 @@ export function EditGroup() {
       {/* Header */}
       <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-sm">
         <div className="mx-auto max-w-4xl flex items-center justify-between px-4 py-3">
-          <Link to="/" className="font-bold text-lg text-primary tracking-tight hover:opacity-80">
-            BTH Feedback
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <img
+              src="https://bthstudent.se/wp-content/blogs.dir/35/files/2018/12/cropped-bsk_logga_hori.png"
+              alt="BSK Logo"
+              className="h-8 w-auto"
+            />
           </Link>
           <div className="flex items-center gap-3">
             <LanguageToggle lang={lang} setLang={setLang} />
@@ -216,6 +223,33 @@ export function EditGroup() {
                   placeholder="https://forms.office.com/..."
                   type="url"
                 />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Logo */}
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base">{i18n.logo}</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div className="flex items-start gap-4">
+                {logoUrl && (
+                  <img
+                    src={logoUrl}
+                    alt="Group logo preview"
+                    className="h-16 w-auto object-contain rounded border bg-white p-1"
+                  />
+                )}
+                <div className="flex-1 space-y-2">
+                  <Label>{i18n.logoUrl}</Label>
+                  <Input
+                    value={logoUrl}
+                    onChange={(e) => setLogoUrl(e.target.value)}
+                    placeholder="https://example.com/logo.png"
+                    type="url"
+                  />
+                </div>
               </div>
             </CardContent>
           </Card>

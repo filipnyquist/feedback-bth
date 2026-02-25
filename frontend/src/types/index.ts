@@ -6,6 +6,7 @@ export interface Program {
   name_en: string;
   group_id: string;
   group_name: string;
+  group_logo_url: string;
 }
 
 export interface Group {
@@ -20,6 +21,7 @@ export interface Group {
   form_url: string;
   form_url_sv: string;
   form_url_en: string;
+  logo_url: string;
   updated_at: string;
 }
 
@@ -42,6 +44,7 @@ export interface AdminGroup {
   about_markdown_en: string;
   form_url_sv: string;
   form_url_en: string;
+  logo_url: string;
   updated_at: string;
   programs: AdminProgram[];
 }
@@ -67,6 +70,7 @@ export interface GroupUpdatePayload {
   about_markdown_en: string;
   form_url_sv: string;
   form_url_en: string;
+  logo_url: string;
   programs: Array<{
     id?: string;
     code: string;

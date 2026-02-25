@@ -31,8 +31,12 @@ export function ProgramDetailPage() {
       {/* Header */}
       <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-sm">
         <div className="mx-auto max-w-4xl flex items-center justify-between px-4 py-3">
-          <Link to="/" className="font-bold text-lg text-primary tracking-tight hover:opacity-80">
-            BTH Feedback
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <img
+              src="https://bthstudent.se/wp-content/blogs.dir/35/files/2018/12/cropped-bsk_logga_hori.png"
+              alt="BSK Logo"
+              className="h-8 w-auto"
+            />
           </Link>
           <LanguageToggle lang={lang} setLang={setLang} />
         </div>
@@ -65,12 +69,21 @@ export function ProgramDetailPage() {
             {/* Group info card */}
             <Card>
               <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                    {i18n.responsibleGroup}
-                  </span>
+                <div className="flex items-center gap-3">
+                  {program.group.logo_url && (
+                    <img
+                      src={program.group.logo_url}
+                      alt={`${program.group.display_name} logo`}
+                      className="h-12 w-auto object-contain"
+                    />
+                  )}
+                  <div>
+                    <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide block mb-1">
+                      {i18n.responsibleGroup}
+                    </span>
+                    <CardTitle className="text-xl">{program.group.display_name}</CardTitle>
+                  </div>
                 </div>
-                <CardTitle className="text-xl">{program.group.display_name}</CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
                 {/* About markdown */}

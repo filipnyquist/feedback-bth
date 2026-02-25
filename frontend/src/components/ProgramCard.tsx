@@ -20,7 +20,16 @@ export function ProgramCard({ program }: ProgramCardProps) {
                 </Badge>
               </div>
               <h3 className="font-semibold text-foreground text-sm leading-snug">{program.name}</h3>
-              <p className="text-xs text-muted-foreground mt-1 truncate">{program.group_name}</p>
+              <div className="flex items-center gap-2 mt-1">
+                {program.group_logo_url && (
+                  <img
+                    src={program.group_logo_url}
+                    alt={program.group_name}
+                    className="h-4 w-auto object-contain opacity-70"
+                  />
+                )}
+                <p className="text-xs text-muted-foreground truncate">{program.group_name}</p>
+              </div>
             </div>
           </div>
         </CardContent>

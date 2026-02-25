@@ -46,6 +46,7 @@ export function handleGetProgramById(
             : group.form_url_sv || group.form_url_en,
         form_url_sv: group.form_url_sv,
         form_url_en: group.form_url_en,
+        logo_url: group.logo_url,
         updated_at: group.updated_at,
       },
     }),

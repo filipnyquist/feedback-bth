@@ -34,8 +34,12 @@ export function Admin() {
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
         <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-sm">
           <div className="mx-auto max-w-4xl flex items-center justify-between px-4 py-3">
-            <Link to="/" className="font-bold text-lg text-primary tracking-tight hover:opacity-80">
-              BTH Feedback
+            <Link to="/" className="hover:opacity-80 transition-opacity">
+              <img
+                src="https://bthstudent.se/wp-content/blogs.dir/35/files/2018/12/cropped-bsk_logga_hori.png"
+                alt="BSK Logo"
+                className="h-8 w-auto"
+              />
             </Link>
             <LanguageToggle lang={lang} setLang={setLang} />
           </div>
@@ -62,8 +66,12 @@ export function Admin() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-sm">
         <div className="mx-auto max-w-4xl flex items-center justify-between px-4 py-3">
-          <Link to="/" className="font-bold text-lg text-primary tracking-tight hover:opacity-80">
-            BTH Feedback
+          <Link to="/" className="hover:opacity-80 transition-opacity">
+            <img
+              src="https://bthstudent.se/wp-content/blogs.dir/35/files/2018/12/cropped-bsk_logga_hori.png"
+              alt="BSK Logo"
+              className="h-8 w-auto"
+            />
           </Link>
           <div className="flex items-center gap-3">
             <LanguageToggle lang={lang} setLang={setLang} />

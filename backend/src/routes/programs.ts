@@ -17,6 +17,7 @@ export function handleGetPrograms(req: Request, corsHeaders: Record<string, stri
       lang === "en"
         ? p.group_display_name_en || p.group_display_name_sv
         : p.group_display_name_sv || p.group_display_name_en,
+    group_logo_url: p.group_logo_url,
   }));
 
   return new Response(JSON.stringify(data), {

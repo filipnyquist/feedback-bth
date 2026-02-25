@@ -37,7 +37,13 @@ export function Home() {
       {/* Header */}
       <header className="sticky top-0 z-10 border-b bg-white/80 backdrop-blur-sm">
         <div className="mx-auto max-w-4xl flex items-center justify-between px-4 py-3">
-          <span className="font-bold text-lg text-primary tracking-tight">BTH Feedback</span>
+          <span className="font-bold text-lg text-primary tracking-tight">
+            <img
+              src="https://bthstudent.se/wp-content/blogs.dir/35/files/2018/12/cropped-bsk_logga_hori.png"
+              alt="BSK Logo"
+              className="h-8 w-auto"
+            />
+          </span>
           <div className="flex items-center gap-3">
             <LanguageToggle lang={lang} setLang={setLang} />
             <Link

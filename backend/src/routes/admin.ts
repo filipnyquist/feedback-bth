@@ -32,6 +32,7 @@ export async function handleGetMe(
         about_markdown_en: g.about_markdown_en,
         form_url_sv: g.form_url_sv,
         form_url_en: g.form_url_en,
+        logo_url: g.logo_url,
         updated_at: g.updated_at,
         programs,
       };
@@ -76,6 +77,7 @@ export async function handleUpdateGroup(
     about_markdown_en: string;
     form_url_sv: string;
     form_url_en: string;
+    logo_url: string;
     programs: Array<{ id?: string; code: string; name_sv: string; name_en: string }>;
   };
 
@@ -86,6 +88,7 @@ export async function handleUpdateGroup(
     about_markdown_en: body.about_markdown_en ?? group.about_markdown_en,
     form_url_sv: body.form_url_sv ?? group.form_url_sv,
     form_url_en: body.form_url_en ?? group.form_url_en,
+    logo_url: body.logo_url ?? group.logo_url,
   });
 
   const programs: Program[] = (body.programs ?? []).map((p) => ({

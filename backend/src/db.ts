@@ -1,5 +1,5 @@
 import { Database } from "bun:sqlite";
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
 import { join } from "path";
 
 const DATABASE_URL = process.env.DATABASE_URL ?? "./feedback.db";
@@ -17,9 +17,23 @@ export function getDb(): Database {
 
 export function runMigrations() {
   const db = getDb();
-  const migrationPath = join(import.meta.dir, "../migrations/001_init.sql");
-  const sql = readFileSync(migrationPath, "utf-8");
-  db.run(sql);
+  const migrationsDir = join(import.meta.dir, "../migrations");
+  // Run all migration files in order
+  const migrationFiles = ["001_init.sql", "002_logo_url.sql"];
+  for (const file of migrationFiles) {
+    const migrationPath = join(migrationsDir, file);
+    if (existsSync(migrationPath)) {
+      const sql = readFileSync(migrationPath, "utf-8");
+      try {
+        db.run(sql);
+      } catch (e: any) {
+        // Ignore "duplicate column" errors from ALTER TABLE being re-run
+        if (!e.message?.includes("duplicate column")) {
+          throw e;
+        }
+      }
+    }
+  }
   console.log("✅ Migrations applied");
 }
 
@@ -34,6 +48,7 @@ export interface Group {
   about_markdown_en: string;
   form_url_sv: string;
   form_url_en: string;
+  logo_url: string;
   updated_at: string;
 }
 
@@ -47,11 +62,11 @@ export interface Program {
 
 // ---------- Queries ----------
 
-export function getAllPrograms(): (Program & { group_display_name_sv: string; group_display_name_en: string })[] {
+export function getAllPrograms(): (Program & { group_display_name_sv: string; group_display_name_en: string; group_logo_url: string })[] {
   const db = getDb();
   return db
     .query(
-      `SELECT p.*, g.display_name_sv AS group_display_name_sv, g.display_name_en AS group_display_name_en
+      `SELECT p.*, g.display_name_sv AS group_display_name_sv, g.display_name_en AS group_display_name_en, g.logo_url AS group_logo_url
        FROM programs p
        JOIN groups g ON p.group_id = g.id
        ORDER BY p.name_sv`
@@ -65,7 +80,7 @@ export function getProgramById(id: string): (Program & { group: Group }) | null 
     .query(
       `SELECT p.id, p.code, p.name_sv, p.name_en, p.group_id,
               g.id AS g_id, g.entra_group_id, g.display_name_sv, g.display_name_en,
-              g.about_markdown_sv, g.about_markdown_en, g.form_url_sv, g.form_url_en, g.updated_at
+              g.about_markdown_sv, g.about_markdown_en, g.form_url_sv, g.form_url_en, g.logo_url, g.updated_at
        FROM programs p
        JOIN groups g ON p.group_id = g.id
        WHERE p.id = ?`
@@ -87,6 +102,7 @@ export function getProgramById(id: string): (Program & { group: Group }) | null 
       about_markdown_en: row.about_markdown_en,
       form_url_sv: row.form_url_sv,
       form_url_en: row.form_url_en,
+      logo_url: row.logo_url,
       updated_at: row.updated_at,
     },
   };
@@ -125,6 +141,7 @@ export function updateGroup(
     about_markdown_en: string;
     form_url_sv: string;
     form_url_en: string;
+    logo_url: string;
   }
 ) {
   const db = getDb();
@@ -136,6 +153,7 @@ export function updateGroup(
        about_markdown_en = ?,
        form_url_sv = ?,
        form_url_en = ?,
+       logo_url = ?,
        updated_at = datetime('now')
      WHERE id = ?`,
     [
@@ -145,6 +163,7 @@ export function updateGroup(
       data.about_markdown_en,
       data.form_url_sv,
       data.form_url_en,
+      data.logo_url,
       id,
     ]
   );
