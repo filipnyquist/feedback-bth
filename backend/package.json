@@ -1,0 +1,10 @@
+{
+  "name": "feedback-bth-backend",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "jose": "^5.0.0"
+  }
+}
