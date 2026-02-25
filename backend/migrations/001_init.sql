@@ -28,8 +28,20 @@ VALUES
     'entra-00000000-0000-0000-0000-000000000001',
     'Blekinge Datateknologer och Systemvetare',
     'Blekinge Computer Engineers and Systems Scientists',
-    '## Om BDS\n\nBDS är en studentförening vid BTH som representerar studenter inom datavetenskap, datorsystem och systemvetenskap.\n\n### Kontakt\n\nHar du frågor, tankar eller klagomål om ditt program? Fyll i vårt feedbackformulär så återkommer vi till dig.',
-    '## About BDS\n\nBDS is a student union at BTH representing students in computer science, computer systems and information systems.\n\n### Contact\n\nDo you have questions, thoughts or complaints about your program? Fill in our feedback form and we will get back to you.',
+    '## Om BDS
+
+BDS är en studentförening vid BTH som representerar studenter inom datavetenskap, datorsystem och systemvetenskap.
+
+### Kontakt
+
+Har du frågor, tankar eller klagomål om ditt program? Fyll i vårt feedbackformulär så återkommer vi till dig.',
+    '## About BDS
+
+BDS is a student union at BTH representing students in computer science, computer systems and information systems.
+
+### Contact
+
+Do you have questions, thoughts or complaints about your program? Fill in our feedback form and we will get back to you.',
     'https://forms.office.com/demo-form-sv',
     'https://forms.office.com/demo-form-en',
     datetime('now')
@@ -39,8 +51,20 @@ VALUES
     'entra-00000000-0000-0000-0000-000000000002',
     'Civilingenjörssektionen',
     'Engineering Section',
-    '## Om Civilingenjörssektionen\n\nVi representerar civilingenjörsprogrammen vid BTH och arbetar för att förbättra studiemiljön.\n\n### Feedback\n\nDin röst är viktig! Använd formuläret nedan för att lämna feedback.',
-    '## About the Engineering Section\n\nWe represent the engineering programs at BTH and work to improve the study environment.\n\n### Feedback\n\nYour voice matters! Use the form below to leave feedback.',
+    '## Om Civilingenjörssektionen
+
+Vi representerar civilingenjörsprogrammen vid BTH och arbetar för att förbättra studiemiljön.
+
+### Feedback
+
+Din röst är viktig! Använd formuläret nedan för att lämna feedback.',
+    '## About the Engineering Section
+
+We represent the engineering programs at BTH and work to improve the study environment.
+
+### Feedback
+
+Your voice matters! Use the form below to leave feedback.',
     'https://forms.office.com/demo-eng-sv',
     'https://forms.office.com/demo-eng-en',
     datetime('now')
@@ -50,8 +74,20 @@ VALUES
     'entra-00000000-0000-0000-0000-000000000003',
     'Hälsotekniksektionen',
     'Health Technology Section',
-    '## Om Hälsotekniksektionen\n\nVi arbetar för studenter inom medicinsk teknik och hälsoinformatik.\n\n### Feedback\n\nLämna dina tankar om programmet här.',
-    '## About the Health Technology Section\n\nWe work for students in medical technology and health informatics.\n\n### Feedback\n\nLeave your thoughts about the program here.',
+    '## Om Hälsotekniksektionen
+
+Vi arbetar för studenter inom medicinsk teknik och hälsoinformatik.
+
+### Feedback
+
+Lämna dina tankar om programmet här.',
+    '## About the Health Technology Section
+
+We work for students in medical technology and health informatics.
+
+### Feedback
+
+Leave your thoughts about the program here.',
     'https://forms.office.com/demo-hal-sv',
     'https://forms.office.com/demo-hal-en',
     datetime('now')
