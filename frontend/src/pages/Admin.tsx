@@ -48,8 +48,8 @@ export function Admin() {
           <h1 className="text-2xl font-bold mb-4">{i18n.adminDashboard}</h1>
           <p className="text-muted-foreground mb-8">
             {lang === "sv"
-              ? "Logga in med ditt BTH Microsoft-konto för att hantera dina grupper."
-              : "Sign in with your BTH Microsoft account to manage your groups."}
+              ? "Logga in med ditt BSK Microsoft-konto för att hantera dina grupper."
+              : "Sign in with your BSK Microsoft account to manage your groups."}
           </p>
           <Button
             size="lg"
