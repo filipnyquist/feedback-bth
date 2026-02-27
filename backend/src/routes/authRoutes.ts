@@ -17,6 +17,22 @@ export async function handleAuthCallback(
 ): Promise<Response> {
   try {
     console.log("[AUTH] Callback received");
+    
+    // Check if user already has a valid JWT (duplicate callback)
+    const cookies = req.headers.get("cookie") || "";
+    const authToken = cookies.split(";").find(c => c.trim().startsWith("auth_token="));
+    if (authToken) {
+      console.log("[AUTH] User already has auth token, redirecting to admin (duplicate callback ignored)");
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: `${FRONTEND_ORIGIN}/admin`,
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+          ...corsHeaders,
+        },
+      });
+    }
+    
     const url = new URL(req.url);
     const code = url.searchParams.get("code");
     const state = url.searchParams.get("state");
@@ -32,10 +48,16 @@ export async function handleAuthCallback(
     console.log("[AUTH] Exchanging code for token...");
     const userInfo = await exchangeCodeForToken(code, state);
     if (!userInfo) {
-      console.error("[AUTH] Token exchange failed");
-      return new Response(JSON.stringify({ error: "Authentication failed" }), {
-        status: 401,
-        headers: { "Content-Type": "application/json", ...corsHeaders },
+      console.error("[AUTH] Token exchange failed - likely duplicate callback or expired state");
+      // Redirect to login page instead of showing error
+      // This handles duplicate callbacks gracefully
+      return new Response(null, {
+        status: 302,
+        headers: {
+          Location: `${FRONTEND_ORIGIN}`,
+          "Cache-Control": "no-store, no-cache, must-revalidate, private",
+          ...corsHeaders,
+        },
       });
     }
 
@@ -48,6 +70,9 @@ export async function handleAuthCallback(
       headers: {
         Location: `${FRONTEND_ORIGIN}/admin`,
         "Set-Cookie": `auth_token=${jwt}; HttpOnly; Path=/; SameSite=Lax; Max-Age=3600`,
+        "Cache-Control": "no-store, no-cache, must-revalidate, private",
+        "Pragma": "no-cache",
+        "Expires": "0",
         ...corsHeaders,
       },
     });

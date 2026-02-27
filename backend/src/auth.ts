@@ -51,12 +51,23 @@ export async function exchangeCodeForToken(
   state: string
 ): Promise<{ userId: string; email: string; groupIds: string[] } | null> {
   try {
-    console.log("[AUTH] Starting token exchange");
+    console.log("[AUTH] Starting token exchange, state:", state.substring(0, 8) + "...");
     const entry = pkceStore.get(state);
     if (!entry) {
-      console.error("[AUTH] PKCE state not found");
+      console.error("[AUTH] PKCE state not found for state:", state.substring(0, 8) + "...");
+      console.error("[AUTH] Available states:", Array.from(pkceStore.keys()).map(k => k.substring(0, 8) + "...").join(", "));
       return null;
     }
+    
+    // Check if state is expired (5 minutes)
+    const stateAge = Date.now() - entry.created_at;
+    if (stateAge > 5 * 60 * 1000) {
+      console.error("[AUTH] PKCE state expired (age:", Math.floor(stateAge / 1000), "seconds)");
+      pkceStore.delete(state);
+      return null;
+    }
+    
+    console.log("[AUTH] PKCE state found and valid, deleting it");
     pkceStore.delete(state);
 
     // Exchange authorization code for access token
