@@ -82,12 +82,12 @@ export async function handleAuthCallback(
     return new Response(null, {
       status: 302,
       headers: {
+        ...corsHeaders,
         Location: `${FRONTEND_ORIGIN}/admin`,
         "Set-Cookie": cookieValue,
         "Cache-Control": "no-store, no-cache, must-revalidate, private",
         "Pragma": "no-cache",
         "Expires": "0",
-        ...corsHeaders,
       },
     });
   } catch (error) {
