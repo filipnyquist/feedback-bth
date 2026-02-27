@@ -51,14 +51,16 @@ export async function exchangeCodeForToken(
   state: string
 ): Promise<{ userId: string; email: string; groupIds: string[] } | null> {
   try {
+    console.log("[AUTH] Starting token exchange");
     const entry = pkceStore.get(state);
     if (!entry) {
-      console.error("PKCE state not found");
+      console.error("[AUTH] PKCE state not found");
       return null;
     }
     pkceStore.delete(state);
 
     // Exchange authorization code for access token
+    console.log("[AUTH] Requesting access token from Microsoft");
     const tokenRes = await fetch(
       `https://login.microsoftonline.com/${TENANT_ID}/oauth2/v2.0/token`,
       {
@@ -77,34 +79,39 @@ export async function exchangeCodeForToken(
 
     if (!tokenRes.ok) {
       const errorText = await tokenRes.text();
-      console.error("Token exchange failed:", errorText);
+      console.error("[AUTH] Token exchange failed:", tokenRes.status, errorText);
       return null;
     }
 
     const tokenData = (await tokenRes.json()) as { access_token: string };
+    console.log("[AUTH] Access token received");
 
     // Fetch user info from Microsoft Graph
+    console.log("[AUTH] Fetching user info from Graph API");
     const meRes = await fetch("https://graph.microsoft.com/v1.0/me", {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
 
     if (!meRes.ok) {
       const errorText = await meRes.text();
-      console.error("Failed to fetch user info:", errorText);
+      console.error("[AUTH] Failed to fetch user info:", meRes.status, errorText);
       return null;
     }
 
     const meData = (await meRes.json()) as { id: string; mail?: string; userPrincipalName?: string };
+    console.log("[AUTH] User info received:", meData.mail ?? meData.userPrincipalName);
 
     // Fetch group memberships
+    console.log("[AUTH] Fetching group memberships");
     const groupRes = await fetch("https://graph.microsoft.com/v1.0/me/memberOf?$select=id", {
       headers: { Authorization: `Bearer ${tokenData.access_token}` },
     });
 
     if (!groupRes.ok) {
       const errorText = await groupRes.text();
-      console.error("Failed to fetch group memberships:", errorText);
+      console.error("[AUTH] Failed to fetch group memberships:", groupRes.status, errorText);
       // Don't fail auth if groups can't be fetched, just use empty array
+      console.log("[AUTH] Continuing with empty group list");
       return {
         userId: meData.id,
         email: meData.mail ?? meData.userPrincipalName ?? "",
@@ -115,7 +122,7 @@ export async function exchangeCodeForToken(
     const groupData = (await groupRes.json()) as { value: { id: string }[] };
     const groupIds = (groupData.value ?? []).map((g) => g.id);
 
-    console.log(`User authenticated: ${meData.mail ?? meData.userPrincipalName}, groups: ${groupIds.length}`);
+    console.log(`[AUTH] User authenticated: ${meData.mail ?? meData.userPrincipalName}, groups: ${groupIds.length}`);
 
     return {
       userId: meData.id,
@@ -123,7 +130,7 @@ export async function exchangeCodeForToken(
       groupIds,
     };
   } catch (error) {
-    console.error("Error in exchangeCodeForToken:", error);
+    console.error("[AUTH] Error in exchangeCodeForToken:", error);
     return null;
   }
 }

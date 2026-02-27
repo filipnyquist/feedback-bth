@@ -17,37 +17,45 @@ export async function handleGetMe(
   req: Request,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
-  const authResult = await requireAuth(req);
-  if (authResult instanceof Response) return authResult;
-  const payload = authResult as JwtPayload;
+  try {
+    const authResult = await requireAuth(req);
+    if (authResult instanceof Response) return authResult;
+    const payload = authResult as JwtPayload;
 
-  const groups = isSuperAdmin(payload.email)
-    ? getAllGroups()
-    : getGroupsByEntraIds(payload.groupIds);
+    const groups = isSuperAdmin(payload.email)
+      ? getAllGroups()
+      : getGroupsByEntraIds(payload.groupIds);
 
-  const result = await Promise.all(
-    groups.map(async (g) => {
-      const programs = getProgramsByGroupId(g.id);
-      return {
-        id: g.id,
-        entra_group_id: g.entra_group_id,
-        display_name_sv: g.display_name_sv,
-        display_name_en: g.display_name_en,
-        about_markdown_sv: g.about_markdown_sv,
-        about_markdown_en: g.about_markdown_en,
-        form_url_sv: g.form_url_sv,
-        form_url_en: g.form_url_en,
-        logo_url: g.logo_url,
-        updated_at: g.updated_at,
-        programs,
-      };
-    })
-  );
+    const result = await Promise.all(
+      groups.map(async (g) => {
+        const programs = getProgramsByGroupId(g.id);
+        return {
+          id: g.id,
+          entra_group_id: g.entra_group_id,
+          display_name_sv: g.display_name_sv,
+          display_name_en: g.display_name_en,
+          about_markdown_sv: g.about_markdown_sv,
+          about_markdown_en: g.about_markdown_en,
+          form_url_sv: g.form_url_sv,
+          form_url_en: g.form_url_en,
+          logo_url: g.logo_url,
+          updated_at: g.updated_at,
+          programs,
+        };
+      })
+    );
 
-  return new Response(
-    JSON.stringify({ userId: payload.userId, email: payload.email, groups: result }),
-    { headers: { "Content-Type": "application/json", ...corsHeaders } }
-  );
+    return new Response(
+      JSON.stringify({ userId: payload.userId, email: payload.email, groups: result }),
+      { headers: { "Content-Type": "application/json", ...corsHeaders } }
+    );
+  } catch (error) {
+    console.error("Error in handleGetMe:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to fetch user data" }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+    );
+  }
 }
 
 export async function handleUpdateGroup(
@@ -55,7 +63,8 @@ export async function handleUpdateGroup(
   groupId: string,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
-  const authResult = await requireAuth(req);
+  try {
+    const authResult = await requireAuth(req);
   if (authResult instanceof Response) return authResult;
   const payload = authResult as JwtPayload;
 
@@ -115,13 +124,21 @@ export async function handleUpdateGroup(
   return new Response(JSON.stringify({ success: true }), {
     headers: { "Content-Type": "application/json", ...corsHeaders },
   });
+  } catch (error) {
+    console.error("Error in handleUpdateGroup:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to update group" }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+    );
+  }
 }
 
 export async function handleCreateGroup(
   req: Request,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
-  const authResult = await requireAuth(req);
+  try {
+    const authResult = await requireAuth(req);
   if (authResult instanceof Response) return authResult;
   const payload = authResult as JwtPayload;
 
@@ -161,6 +178,13 @@ export async function handleCreateGroup(
     status: 201,
     headers: { "Content-Type": "application/json", ...corsHeaders },
   });
+  } catch (error) {
+    console.error("Error in handleCreateGroup:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to create group" }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+    );
+  }
 }
 
 export async function handleDeleteGroup(
@@ -168,28 +192,36 @@ export async function handleDeleteGroup(
   groupId: string,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
-  const authResult = await requireAuth(req);
-  if (authResult instanceof Response) return authResult;
-  const payload = authResult as JwtPayload;
+  try {
+    const authResult = await requireAuth(req);
+    if (authResult instanceof Response) return authResult;
+    const payload = authResult as JwtPayload;
 
-  if (!isSuperAdmin(payload.email)) {
-    return new Response(JSON.stringify({ error: "Forbidden" }), {
-      status: 403,
+    if (!isSuperAdmin(payload.email)) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const group = getGroupById(groupId);
+    if (!group) {
+      return new Response(JSON.stringify({ error: "Not found" }), {
+        status: 404,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    deleteGroup(groupId);
+
+    return new Response(JSON.stringify({ success: true }), {
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
+  } catch (error) {
+    console.error("Error in handleDeleteGroup:", error);
+    return new Response(
+      JSON.stringify({ error: "Failed to delete group" }),
+      { status: 500, headers: { "Content-Type": "application/json", ...corsHeaders } }
+    );
   }
-
-  const group = getGroupById(groupId);
-  if (!group) {
-    return new Response(JSON.stringify({ error: "Not found" }), {
-      status: 404,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
-  }
-
-  deleteGroup(groupId);
-
-  return new Response(JSON.stringify({ success: true }), {
-    headers: { "Content-Type": "application/json", ...corsHeaders },
-  });
 }
