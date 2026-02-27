@@ -238,3 +238,28 @@ export function deleteGroup(id: string) {
   const db = getDb();
   db.run(`DELETE FROM groups WHERE id = ?`, [id]);
 }
+
+// User session management
+export function upsertUserSession(userId: string, email: string, groupIds: string[]) {
+  const db = getDb();
+  db.run(
+    `INSERT INTO user_sessions (user_id, email, group_ids, updated_at)
+     VALUES (?, ?, ?, datetime('now'))
+     ON CONFLICT(user_id) DO UPDATE SET
+       email = excluded.email,
+       group_ids = excluded.group_ids,
+       updated_at = datetime('now')`,
+    [userId, email, JSON.stringify(groupIds)]
+  );
+}
+
+export function getUserSession(userId: string): { userId: string; email: string; groupIds: string[] } | null {
+  const db = getDb();
+  const row = db.query(`SELECT user_id, email, group_ids FROM user_sessions WHERE user_id = ?`).get(userId) as any;
+  if (!row) return null;
+  return {
+    userId: row.user_id,
+    email: row.email,
+    groupIds: JSON.parse(row.group_ids),
+  };
+}

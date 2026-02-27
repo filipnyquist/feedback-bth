@@ -21,6 +21,13 @@ CREATE TABLE IF NOT EXISTS programs (
   group_id TEXT NOT NULL REFERENCES groups(id) ON DELETE CASCADE
 );
 
+CREATE TABLE IF NOT EXISTS user_sessions (
+  user_id TEXT PRIMARY KEY,
+  email TEXT NOT NULL,
+  group_ids TEXT NOT NULL, -- JSON array of group IDs
+  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+);
+
 -- Seed data: BTH student unions
 INSERT OR IGNORE INTO groups (id, entra_group_id, display_name_sv, display_name_en, about_markdown_sv, about_markdown_en, form_url_sv, form_url_en, logo_url, updated_at)
 VALUES

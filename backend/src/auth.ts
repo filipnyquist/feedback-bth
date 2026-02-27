@@ -151,7 +151,12 @@ export async function createJwt(payload: {
   email: string;
   groupIds: string[];
 }): Promise<string> {
-  return new SignJWT({ ...payload })
+  // Only store userId and email in JWT to keep it small
+  // We'll fetch groups fresh from the database when needed
+  return new SignJWT({ 
+    userId: payload.userId,
+    email: payload.email
+  })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
     .setExpirationTime("1h")
@@ -161,7 +166,7 @@ export async function createJwt(payload: {
 export interface JwtPayload {
   userId: string;
   email: string;
-  groupIds: string[];
+  groupIds?: string[]; // Optional - not stored in JWT anymore, fetched from Graph API
   exp: number;
   iat: number;
 }

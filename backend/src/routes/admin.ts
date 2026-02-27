@@ -9,6 +9,7 @@ import {
   deleteProgramsByGroupId,
   createGroup,
   deleteGroup,
+  getUserSession,
   Program,
 } from "../db";
 import { randomUUID } from "crypto";
@@ -29,9 +30,21 @@ export async function handleGetMe(
     const payload = authResult as JwtPayload;
     console.log("[API] /me auth success for:", payload.email);
 
-    const groups = isSuperAdmin(payload.email)
-      ? getAllGroups()
-      : getGroupsByEntraIds(payload.groupIds);
+    // For superadmin, get all groups. For regular users, get groups from session
+    let groups;
+    if (isSuperAdmin(payload.email)) {
+      groups = getAllGroups();
+    } else {
+      const session = getUserSession(payload.userId);
+      if (!session) {
+        console.log("[API] No session found for user:", payload.userId);
+        return new Response(JSON.stringify({ error: "Session not found" }), {
+          status: 401,
+          headers: { "Content-Type": "application/json", ...corsHeaders },
+        });
+      }
+      groups = getGroupsByEntraIds(session.groupIds);
+    }
 
     const result = await Promise.all(
       groups.map(async (g) => {
@@ -83,9 +96,17 @@ export async function handleUpdateGroup(
     });
   }
 
-  // Allow superadmins to edit any group, otherwise check Entra group membership
+  // Allow superadmins to edit any group, otherwise check session group membership
   if (!isSuperAdmin(payload.email)) {
-    if (!group.entra_group_id || !payload.groupIds.includes(group.entra_group_id)) {
+    const session = getUserSession(payload.userId);
+    if (!session) {
+      return new Response(JSON.stringify({ error: "Session not found" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+    
+    if (!group.entra_group_id || !session.groupIds.includes(group.entra_group_id)) {
       return new Response(JSON.stringify({ error: "Forbidden" }), {
         status: 403,
         headers: { "Content-Type": "application/json", ...corsHeaders },

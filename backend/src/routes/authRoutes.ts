@@ -1,4 +1,5 @@
 import { generateLoginUrl, exchangeCodeForToken, createJwt } from "../auth";
+import { upsertUserSession } from "../db";
 
 const FRONTEND_ORIGIN = process.env.FRONTEND_ORIGIN ?? "http://localhost:5173";
 
@@ -69,6 +70,11 @@ export async function handleAuthCallback(
     }
 
     console.log("[AUTH] Creating JWT for user:", userInfo.email);
+    
+    // Store user session with group memberships in database
+    upsertUserSession(userInfo.userId, userInfo.email, userInfo.groupIds);
+    console.log("[AUTH] Stored session with", userInfo.groupIds.length, "groups");
+    
     const jwt = await createJwt(userInfo);
 
     // Determine if we're in production (HTTPS) or development
