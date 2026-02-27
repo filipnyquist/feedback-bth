@@ -18,9 +18,16 @@ export async function handleGetMe(
   corsHeaders: Record<string, string>
 ): Promise<Response> {
   try {
+    const cookies = req.headers.get("cookie") || "";
+    console.log("[API] /me called, cookies present:", cookies ? "yes" : "no");
+    
     const authResult = await requireAuth(req);
-    if (authResult instanceof Response) return authResult;
+    if (authResult instanceof Response) {
+      console.log("[API] /me auth failed");
+      return authResult;
+    }
     const payload = authResult as JwtPayload;
+    console.log("[API] /me auth success for:", payload.email);
 
     const groups = isSuperAdmin(payload.email)
       ? getAllGroups()

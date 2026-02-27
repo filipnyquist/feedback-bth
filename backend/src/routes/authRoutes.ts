@@ -71,12 +71,19 @@ export async function handleAuthCallback(
     console.log("[AUTH] Creating JWT for user:", userInfo.email);
     const jwt = await createJwt(userInfo);
 
+    // Determine if we're in production (HTTPS) or development
+    const isProduction = FRONTEND_ORIGIN.startsWith("https://");
+    const secureFlag = isProduction ? " Secure;" : "";
+    
+    const cookieValue = `auth_token=${jwt}; HttpOnly; Path=/;${secureFlag} SameSite=Lax; Max-Age=3600`;
+    console.log("[AUTH] Setting cookie (length:", jwt.length, ", secure:", isProduction, ")");
     console.log("[AUTH] Redirecting to:", `${FRONTEND_ORIGIN}/admin`);
+    
     return new Response(null, {
       status: 302,
       headers: {
         Location: `${FRONTEND_ORIGIN}/admin`,
-        "Set-Cookie": `auth_token=${jwt}; HttpOnly; Path=/; SameSite=Lax; Max-Age=3600`,
+        "Set-Cookie": cookieValue,
         "Cache-Control": "no-store, no-cache, must-revalidate, private",
         "Pragma": "no-cache",
         "Expires": "0",
