@@ -16,6 +16,13 @@ export async function handleAuthCallback(
   corsHeaders: Record<string, string>
 ): Promise<Response> {
   try {
+    // Detect and ignore prefetch requests
+    const purpose = req.headers.get("purpose") || req.headers.get("x-purpose") || req.headers.get("sec-purpose");
+    if (purpose === "prefetch" || purpose === "preview") {
+      console.log("[AUTH] Ignoring prefetch/preview request");
+      return new Response(null, { status: 204, headers: corsHeaders });
+    }
+    
     console.log("[AUTH] Callback received");
     
     // Check if user already has a valid JWT (duplicate callback)
@@ -49,12 +56,12 @@ export async function handleAuthCallback(
     const userInfo = await exchangeCodeForToken(code, state);
     if (!userInfo) {
       console.error("[AUTH] Token exchange failed - likely duplicate callback or expired state");
-      // Redirect to login page instead of showing error
-      // This handles duplicate callbacks gracefully
+      // Redirect to /admin instead of home - if user has cookie from parallel request, they'll be logged in
+      // If not, the frontend will redirect them to login
       return new Response(null, {
         status: 302,
         headers: {
-          Location: `${FRONTEND_ORIGIN}`,
+          Location: `${FRONTEND_ORIGIN}/admin`,
           "Cache-Control": "no-store, no-cache, must-revalidate, private",
           ...corsHeaders,
         },
