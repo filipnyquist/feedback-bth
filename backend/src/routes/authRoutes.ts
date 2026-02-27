@@ -14,33 +14,43 @@ export async function handleAuthCallback(
   req: Request,
   corsHeaders: Record<string, string>
 ): Promise<Response> {
-  const url = new URL(req.url);
-  const code = url.searchParams.get("code");
-  const state = url.searchParams.get("state");
+  try {
+    const url = new URL(req.url);
+    const code = url.searchParams.get("code");
+    const state = url.searchParams.get("state");
 
-  if (!code || !state) {
-    return new Response(JSON.stringify({ error: "Missing code or state" }), {
-      status: 400,
+    if (!code || !state) {
+      console.error("Auth callback missing code or state");
+      return new Response(JSON.stringify({ error: "Missing code or state" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const userInfo = await exchangeCodeForToken(code, state);
+    if (!userInfo) {
+      console.error("Authentication failed for user");
+      return new Response(JSON.stringify({ error: "Authentication failed" }), {
+        status: 401,
+        headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+
+    const jwt = await createJwt(userInfo);
+
+    return new Response(null, {
+      status: 302,
+      headers: {
+        Location: `${FRONTEND_ORIGIN}/admin`,
+        "Set-Cookie": `auth_token=${jwt}; HttpOnly; Path=/; SameSite=Lax; Max-Age=3600`,
+        ...corsHeaders,
+      },
+    });
+  } catch (error) {
+    console.error("Error in auth callback:", error);
+    return new Response(JSON.stringify({ error: "Internal server error during authentication" }), {
+      status: 500,
       headers: { "Content-Type": "application/json", ...corsHeaders },
     });
   }
-
-  const userInfo = await exchangeCodeForToken(code, state);
-  if (!userInfo) {
-    return new Response(JSON.stringify({ error: "Authentication failed" }), {
-      status: 401,
-      headers: { "Content-Type": "application/json", ...corsHeaders },
-    });
-  }
-
-  const jwt = await createJwt(userInfo);
-
-  return new Response(null, {
-    status: 302,
-    headers: {
-      Location: `${FRONTEND_ORIGIN}/admin`,
-      "Set-Cookie": `auth_token=${jwt}; HttpOnly; Path=/; SameSite=Lax; Max-Age=3600`,
-      ...corsHeaders,
-    },
-  });
 }
